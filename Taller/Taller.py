@@ -7,8 +7,8 @@ class TallerDB:
             self.connection = mysql.connector.connect(
                 host='localhost', 
                 user='root', 
-                password='root', 
-                port='3308', 
+                password='', 
+                port='3306', 
                 database='taller_mecanico', 
                 ssl_disabled=True 
             )
