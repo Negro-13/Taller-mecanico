@@ -1,213 +1,151 @@
 import flet as ft
 import mysql.connector
+from Clientes import clientes
 
-class TallerDB:
-    def __init__(self):
-        try:
-            self.connection = mysql.connector.connect(
-                host='localhost',
-                user='root',
-                password='root',
-                port='3308',
-                database='taller_mecanico',
-                ssl_disabled=True
-            )
-            if self.connection.is_connected():
-                print("> Conexion exitosa")
-                self.cursor = self.connection.cursor()
-        except Exception as ex:
-            print("> Error de conexion:", ex)
-            exit()
-
-def main(page: ft.Page):
-    page.title = "Pantalla dividida"
-    db = TallerDB()
-
-    area_derecha = ft.Column()
-    area_izquierda = ft.Column()
-
-    def mostrar_todos(e):
-        query = "SELECT * FROM Clientes"
-        db.cursor.execute(query)
-        resultados = db.cursor.fetchall()
-
-        def editar_cliente(e):
-            dni = e.control.data
-            print(f"Editar cliente con DNI: {dni}")
-
-        def eliminar_cliente(e):
-            dni = e.control.data
-            delete_query = "DELETE FROM Clientes WHERE DNI = %s"
-            db.cursor.execute(delete_query, (dni,))
-            db.connection.commit()
-            mostrar_todos(None)
-
-        filas = []
-        for cliente in resultados:
-            dni = cliente[0]
-            btn_editar = ft.ElevatedButton("Editar", on_click=editar_cliente, data=dni)
-            btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_cliente, data=dni)
-
-            fila = ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text(str(cliente[0]))),
-                    ft.DataCell(ft.Text(cliente[1])),
-                    ft.DataCell(ft.Text(cliente[2])),
-                    ft.DataCell(ft.Text(cliente[4])),
-                    ft.DataCell(ft.Text(cliente[3])),
-                    ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
-                ]
-            )
-            filas.append(fila)
-
-        area_derecha.controls.clear()
-        area_derecha.controls.append(ft.Text("Lista de Clientes:"))
-        area_derecha.controls.append(
-            ft.DataTable(
-                columns=[
-                    ft.DataColumn(ft.Text("DNI")),
-                    ft.DataColumn(ft.Text("Nombre")),
-                    ft.DataColumn(ft.Text("Apellido")),
-                    ft.DataColumn(ft.Text("Teléfono")),
-                    ft.DataColumn(ft.Text("Dirección")),
-                    ft.DataColumn(ft.Text("Acciones")),
-                ],
-                rows=filas
-            )
+def connect_to_db():
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            port='3306',
+            user='root',
+            password='',
+            database='Taller_Mecanico',
+            ssl_disabled=True
         )
-        page.update()
+        if connection.is_connected():
+            print('Conexión exitosa')
+            return connection
+    except Exception as ex:
+        print('Conexión errónea')
+        print(ex)
+        return None
 
-    def crear_cliente(e):
-        dni_cliente = ft.TextField(label="DNI")
-        nombre_cliente = ft.TextField(label="Nombre")
-        apellido_cliente = ft.TextField(label="Apellido")
-        telefono_cliente = ft.TextField(label="Teléfono")
-        direccion_cliente = ft.TextField(label="Dirección")
+connection = connect_to_db()
 
-        def guardar_cliente(e):
-            insert_query = "INSERT INTO Clientes (DNI, Nombre, Apellido, Direccion, Telefono) VALUES (%s, %s, %s, %s, %s)"
-            data = (
-                dni_cliente.value,
-                nombre_cliente.value,
-                apellido_cliente.value,
-                direccion_cliente.value,
-                telefono_cliente.value
-            )
-            db.cursor.execute(insert_query, data)
-            db.connection.commit()
-            mostrar_todos(None)
-
-        area_izquierda.controls.clear()
-        area_izquierda.controls.append(ft.Text("Crear nuevo cliente:"))
-        area_izquierda.controls.append(dni_cliente)
-        area_izquierda.controls.append(nombre_cliente)
-        area_izquierda.controls.append(apellido_cliente)
-        area_izquierda.controls.append(telefono_cliente)
-        area_izquierda.controls.append(direccion_cliente)
-        area_izquierda.controls.append(ft.ElevatedButton("Crear", on_click=guardar_cliente))
-        area_izquierda.controls.append(ft.ElevatedButton("Buscar", on_click=buscar_cliente))
-        page.update()
-
-    def buscar_cliente(e):
-        area_izquierda.controls.clear()
-
-        campo_busqueda = ft.TextField(label="Ingrese el valor a buscar")
-
-        criterio_dropdown = ft.Dropdown(
-            label="Buscar por",
-            options=[
-                ft.dropdown.Option("DNI"),
-                ft.dropdown.Option("Nombre"),
-                ft.dropdown.Option("Apellido"),
-                ft.dropdown.Option("Teléfono")
-            ],
-            value="DNI"
-        )
-
-        def ejecutar_busqueda(e):
-            valor = campo_busqueda.value
-            criterio = criterio_dropdown.value
-
-            columnas_sql = {
-                "DNI": "DNI",
-                "Nombre": "Nombre",
-                "Apellido": "Apellido",
-                "Teléfono": "Telefono"
-            }
-
-            if criterio not in columnas_sql:
-                return
-
-            query = f"SELECT * FROM Clientes WHERE {columnas_sql[criterio]} = %s"
-            db.cursor.execute(query, (valor,))
-            resultados = db.cursor.fetchall()
-
-            def editar_cliente(e):
-                dni = e.control.data
-                print(f"Editar cliente con DNI: {dni}")
-
-            def eliminar_cliente(e):
-                dni = e.control.data
-                delete_query = "DELETE FROM Clientes WHERE DNI = %s"
-                db.cursor.execute(delete_query, (dni,))
-                db.connection.commit()
-                mostrar_todos(None)
-
-            filas = []
-            for cliente in resultados:
-                dni = cliente[0]
-                btn_editar = ft.ElevatedButton("Editar", on_click=editar_cliente, data=dni)
-                btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_cliente, data=dni)
-
-                fila = ft.DataRow(
-                    cells=[
-                        ft.DataCell(ft.Text(cliente[0])),
-                        ft.DataCell(ft.Text(cliente[1])),
-                        ft.DataCell(ft.Text(cliente[2])),
-                        ft.DataCell(ft.Text(cliente[4])),
-                        ft.DataCell(ft.Text(cliente[3])),
-                        ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
-                    ]
-                )
-                filas.append(fila)
-
-            area_derecha.controls.clear()
-            area_derecha.controls.append(ft.Text("Resultado de la búsqueda:"))
-            area_derecha.controls.append(
-                ft.DataTable(
-                    columns=[
-                        ft.DataColumn(ft.Text("DNI")),
-                        ft.DataColumn(ft.Text("Nombre")),
-                        ft.DataColumn(ft.Text("Apellido")),
-                        ft.DataColumn(ft.Text("Teléfono")),
-                        ft.DataColumn(ft.Text("Dirección")),
-                        ft.DataColumn(ft.Text("Acciones")),
-                    ],
-                    rows=filas
-                )
-            )
-            page.update()
-
-        boton_buscar = ft.ElevatedButton("Buscar", on_click=ejecutar_busqueda)
-
-        area_izquierda.controls.append(ft.Text("Buscar cliente"))
-        area_izquierda.controls.append(criterio_dropdown)
-        area_izquierda.controls.append(campo_busqueda)
-        area_izquierda.controls.append(boton_buscar)
-        area_izquierda.controls.append(ft.ElevatedButton("Crear", on_click=crear_cliente))
-        area_izquierda.controls.append(ft.ElevatedButton("Atras", on_click=mostrar_todos))
-        page.update()
-
-    layout = ft.Row(
-        expand=True,
-        controls=[
-            ft.Container(content=area_izquierda, expand=3, padding=10),
-            ft.Container(content=area_derecha, expand=7, padding=10)
-        ]
+def menu_principal(page: ft.Page):
+    page.window.maximized = True
+    page.title = "Administración de Taller Mecánico"
+    
+    # ----Assets Personales----
+    cliente_icono = ft.Image(src="usuario.png", width=28, height=28)
+    cliente_item = ft.Row(
+        controls=[cliente_icono, ft.Text("Cliente")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=8
     )
 
-    page.add(layout)
-    mostrar_todos(None)
-    buscar_cliente(None)
+    vehiculo_icono = ft.Image(src ="vehiculo.png", width=28, height=28)
+    vehiculo_item = ft.Row(
+        controls=[vehiculo_icono, ft.Text("Vehiculos")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing= 8
+    )
+    
+    proveedor_icono = ft.Image(src="proveedor.png", width=28, height=28)
+    proveedor_item = ft.Row(
+        controls=[proveedor_icono, ft.Text("Proveedor")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=8
+    )
+    
+    repuesto_icono = ft.Image(src="caja-de-cambios.png", width=28, height=28)
+    repuesto_item = ft.Row(
+        controls=[repuesto_icono, ft.Text("Repuesto")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=8
+    )
+    
+    empleado_icono = ft.Image(src="empleado.png", width=28, height=28)
+    empleado_item = ft.Row(
+        controls=[empleado_icono, ft.Text("Empleado")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=8
+    ) 
+    
+    usuario_icono = ft.Image(src="usuarios.png", width=28, height=28)
+    usuario_item = ft.Row(
+        controls=[usuario_icono, ft.Text("Usuario")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=8
+    )
+    
+    ficha_tecnica_icono = ft.Image(src="auto.png", width=28, height=28)
+    ficha_tecnica_item = ft.Row(
+        controls=[ficha_tecnica_icono, ft.Text("Ficha Técnica")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=8
+    )
+    
+    presupuesto_icono = ft.Image(src="presupuesto.png", width=28, height=28)
+    presupuesto_icono_item = ft.Row(
+        controls=[presupuesto_icono, ft.Text("Presupuesto")],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=8
+    )
+    
+    # ---Menús---
+    archivo_menu = ft.PopupMenuButton(
+        items=[
+            ft.PopupMenuItem(text="Copiar", icon=ft.Icons.COPY),
+            ft.PopupMenuItem(text="Salir", icon=ft.Icons.EXIT_TO_APP),
+        ],
+        content=ft.Text("Archivo"), tooltip="Archivo"
+    )
 
-ft.app(target=main)
+    herramientas_menu = ft.PopupMenuButton(
+        items=[
+            ft.PopupMenuItem(content=cliente_item, on_click=lambda e: cliente(e, page)),
+            ft.PopupMenuItem(content=vehiculo_item, on_click=lambda e: vehiculo(e, page)),
+            ft.PopupMenuItem(content=proveedor_item, on_click=lambda e: proveedor(e, page)),
+            ft.PopupMenuItem(content=repuesto_item, on_click=lambda e: producto(e, page)),
+            ft.PopupMenuItem(content=empleado_item, on_click=lambda e: empleado(e, page)),
+            ft.PopupMenuItem(content=usuario_item, on_click=lambda e: usuario(e, page)),
+        ],
+        content=ft.Text("Herramientas"), tooltip="Administrador de archivos maestros"
+    )
+    
+    administracion = ft.PopupMenuButton(
+        items=[
+            ft.PopupMenuItem(content=ficha_tecnica_item),
+            ft.PopupMenuItem(content=presupuesto_icono_item),
+        ],
+        content=ft.Text("Administración"), tooltip="Administración de presupuesto y ficha técnica"
+    )
+    
+    # ---Botones de herramientas---
+    boton_cliente = ft.IconButton(content=ft.Row(controls=[cliente_icono]), tooltip="Cliente", on_click=cliente)
+    boton_vehiculo = ft.IconButton(content=ft.Row(controls=[vehiculo_icono]), tooltip="Vehiculo")
+    boton_producto = ft.IconButton(content=ft.Row(controls=[repuesto_icono]), tooltip="Repuesto")
+    boton_ficha_tecnica = ft.IconButton(content=ft.Row(controls=[ficha_tecnica_icono]), tooltip="Ficha Técnica")
+    boton_presupuesto = ft.IconButton(content=ft.Row(controls=[presupuesto_icono]), tooltip="Presupuesto")
+    
+    # ---Agregar al layout---
+    page.add(
+        ft.Row(controls=[archivo_menu, administracion, herramientas_menu], spacing=10),
+        ft.Row(controls=[boton_cliente, boton_producto, boton_ficha_tecnica, boton_presupuesto])
+    )
+
+def cliente(e, page: ft.Page):
+    clientes(page)
+
+def vehiculo(e, page:ft.Page):
+    clientes(page)
+
+def proveedor(e, page: ft.Page):
+    pass
+
+def producto(e, page: ft.Page):
+    pass
+
+def empleado(e, page: ft.Page):
+    pass
+
+def usuario(e, page: ft.Page):
+    pass
+
+def main(page: ft.Page):
+    page.theme_mode = ft.ThemeMode.DARK
+    page.window.maximized = True
+    menu_principal(page)
+
+ft.app(target=main, assets_dir="assets")

@@ -19,75 +19,75 @@ class TallerDB:
             print("> Error de conexion:", ex)
             exit()
 
-def clientes(page: ft.Page):
-    page.title = "Interfaz Cliente"
+def vehiculos(page: ft.Page):
+    page.title = "Interfaz Vehiculo"
     db = TallerDB()
 
     area_derecha = ft.Column()
     area_izquierda = ft.Column()
 
     def mostrar_todos(e):
-        query = "SELECT * FROM Clientes"
+        query = "SELECT * FROM Vehiculos"
         db.cursor.execute(query)
         resultados = db.cursor.fetchall()
 
-        def editar_cliente(e):
+        def editar_vehiculo(e):
             dni = e.control.data
             print(f"Editar cliente con DNI: {dni}")
 
-        def eliminar_cliente(e):
-            dni = e.control.data
-            delete_query = "DELETE FROM Clientes WHERE DNI = %s"
-            db.cursor.execute(delete_query, (dni,))
+        def eliminar_vehiculo(e):
+            patente = e.control.data
+            delete_query = "DELETE FROM Vehiculos WHERE Patente = %s"
+            db.cursor.execute(delete_query, (patente,))
             db.connection.commit()
             mostrar_todos(None)
 
         filas = []
-        for cliente in resultados:
-            dni = cliente[0]
-            btn_editar = ft.ElevatedButton("Editar", on_click=editar_cliente, data=dni)
-            btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_cliente, data=dni)
+        for vehiculo in resultados:
+            patente = vehiculo[0]
+            btn_editar = ft.ElevatedButton("Editar", on_click=editar_vehiculo, data=patente)
+            btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_vehiculo, data=patente)
 
             fila = ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(str(cliente[0]))),
-                    ft.DataCell(ft.Text(cliente[1])),
-                    ft.DataCell(ft.Text(cliente[2])),
-                    ft.DataCell(ft.Text(cliente[4])),
-                    ft.DataCell(ft.Text(cliente[3])),
+                    ft.DataCell(ft.Text(str(patente[0]))),
+                    ft.DataCell(ft.Text(patente[1])),
+                    ft.DataCell(ft.Text(patente[2])),
+                    ft.DataCell(ft.Text(patente[4])),
+                    ft.DataCell(ft.Text(patente[3])),
                     ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
                 ]
             )
             filas.append(fila)
 
         area_derecha.controls.clear()
-        area_derecha.controls.append(ft.Text("Lista de Clientes:"))
+        area_derecha.controls.append(ft.Text("Lista de Vehiculos:"))
         area_derecha.controls.append(
             ft.DataTable(
                 columns=[
+                    ft.DataColumn(ft.Text("Patente")),
                     ft.DataColumn(ft.Text("DNI")),
-                    ft.DataColumn(ft.Text("Nombre")),
-                    ft.DataColumn(ft.Text("Apellido")),
-                    ft.DataColumn(ft.Text("Teléfono")),
-                    ft.DataColumn(ft.Text("Dirección")),
+                    ft.DataColumn(ft.Text("Marca")),
+                    ft.DataColumn(ft.Text("Modelo")),
+                    ft.DataColumn(ft.Text("Color")),
                     ft.DataColumn(ft.Text("Acciones")),
                 ],
                 rows=filas
             )
         )
         page.update()
-
+#terminar de hacer
     def crear_cliente(e):
-        dni_cliente = ft.TextField(label="DNI")
-        nombre_cliente = ft.TextField(label="Nombre")
-        apellido_cliente = ft.TextField(label="Apellido")
-        telefono_cliente = ft.TextField(label="Teléfono")
-        direccion_cliente = ft.TextField(label="Dirección")
+        patente_vehiculo = ft.TextField(label="Patente")
+        nombre_cliente = ft.TextField(label="DNI")
+        apellido_cliente = ft.TextField(label="Marca")
+        telefono_cliente = ft.TextField(label="Modelo")
+        direccion_cliente = ft.TextField(label="Color")
 
         def guardar_cliente(e):
-            insert_query = "INSERT INTO Clientes (DNI, Nombre, Apellido, Direccion, Telefono) VALUES (%s, %s, %s, %s, %s)"
+            insert_query = "INSERT INTO Vehiculos (Patente, DNI, Marca, Modelo, Color) VALUES (%s, %s, %s, %s, %s)"
             data = (
-                dni_cliente.value,
+                patente_vehiculo.value,
                 nombre_cliente.value,
                 apellido_cliente.value,
                 direccion_cliente.value,
@@ -212,4 +212,4 @@ def clientes(page: ft.Page):
     mostrar_todos(None)
     buscar_cliente(None)
 
-#ft.app(target=clientes)
+ft.app(target=vehiculos)
