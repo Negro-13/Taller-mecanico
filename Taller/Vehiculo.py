@@ -7,8 +7,8 @@ class TallerDB:
             self.connection = mysql.connector.connect(
                 host='localhost',
                 user='root',
-                password='',
-                port='3306',
+                password='root',
+                port='3308',
                 database='taller_mecanico',
                 ssl_disabled=True
             )
@@ -50,11 +50,11 @@ def vehiculos(page: ft.Page):
 
             fila = ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(str(patente[0]))),
-                    ft.DataCell(ft.Text(patente[1])),
-                    ft.DataCell(ft.Text(patente[2])),
-                    ft.DataCell(ft.Text(patente[4])),
-                    ft.DataCell(ft.Text(patente[3])),
+                    ft.DataCell(ft.Text(vehiculo[0])),
+                    ft.DataCell(ft.Text(vehiculo[1])),
+                    ft.DataCell(ft.Text(vehiculo[2])),
+                    ft.DataCell(ft.Text(vehiculo[3])),
+                    ft.DataCell(ft.Text(vehiculo[4])),
                     ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
                 ]
             )
@@ -76,43 +76,43 @@ def vehiculos(page: ft.Page):
             )
         )
         page.update()
-#terminar de hacer
+
     def crear_cliente(e):
         patente_vehiculo = ft.TextField(label="Patente")
-        nombre_cliente = ft.TextField(label="DNI")
-        apellido_cliente = ft.TextField(label="Marca")
-        telefono_cliente = ft.TextField(label="Modelo")
-        direccion_cliente = ft.TextField(label="Color")
+        dni_dueño = ft.TextField(label="DNI")
+        marca_vehiculo = ft.TextField(label="Marca")
+        modelo_vehiculo = ft.TextField(label="Modelo")
+        color_vehiculo = ft.TextField(label="Color")
 
-        def guardar_cliente(e):
+        def guardar_vehiculo(e):
             insert_query = "INSERT INTO Vehiculos (Patente, DNI, Marca, Modelo, Color) VALUES (%s, %s, %s, %s, %s)"
             data = (
                 patente_vehiculo.value,
-                nombre_cliente.value,
-                apellido_cliente.value,
-                direccion_cliente.value,
-                telefono_cliente.value
+                dni_dueño.value,
+                marca_vehiculo.value,
+                modelo_vehiculo.value,
+                color_vehiculo.value
             )
             db.cursor.execute(insert_query, data)
             db.connection.commit()
             mostrar_todos(None)
         
-        boton_crear = ft.ElevatedButton("Crear", on_click=guardar_cliente)
-        boton_buscar = ft.ElevatedButton("Buscar", on_click=buscar_cliente)
+        boton_crear = ft.ElevatedButton("Crear", on_click=guardar_vehiculo)
+        boton_buscar = ft.ElevatedButton("Buscar", on_click=buscar_vehiculo)
 
         area_izquierda.controls.clear()
         area_izquierda.controls.append(ft.Text("Crear nuevo cliente:"))
-        area_izquierda.controls.append(dni_cliente)
-        area_izquierda.controls.append(nombre_cliente)
-        area_izquierda.controls.append(apellido_cliente)
-        area_izquierda.controls.append(telefono_cliente)
-        area_izquierda.controls.append(direccion_cliente)
+        area_izquierda.controls.append(patente_vehiculo)
+        area_izquierda.controls.append(dni_dueño)
+        area_izquierda.controls.append(marca_vehiculo)  
+        area_izquierda.controls.append(modelo_vehiculo)
+        area_izquierda.controls.append(color_vehiculo)
         area_izquierda.controls.append(ft.Row(controls=[boton_buscar, boton_crear]))
         page.update()
 
-    def buscar_cliente(e):
+# No termine de cambiar las siguientes partes
+    def buscar_vehiculo(e):
         area_izquierda.controls.clear()
-
         campo_busqueda = ft.TextField(label="Ingrese el valor a buscar")
 
         criterio_dropdown = ft.Dropdown(
@@ -210,6 +210,6 @@ def vehiculos(page: ft.Page):
 
     page.add(layout)
     mostrar_todos(None)
-    buscar_cliente(None)
+    buscar_vehiculo(None)
 
 ft.app(target=vehiculos)
