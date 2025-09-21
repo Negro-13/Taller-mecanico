@@ -39,14 +39,30 @@ CREATE TABLE IF NOT EXISTS `Reparaciones` (
     FOREIGN KEY (`Legajo`) REFERENCES `Mecanicos`(`legajo`)
 );
 
-CREATE TABLE IF NOT EXISTS `Repuestos` (
-	`ID` VARCHAR(50),
+CREATE TABLE IF NOT EXISTS `Repuestos_Reparacion` (
 	`Codigo_repuesto` VARCHAR(50) PRIMARY KEY,
     `Precio` FLOAT,
     `Cant_rep` int,
     `Importe` FLOAT GENERATED ALWAYS AS ( `Precio` *  `Cant_rep`) STORED,
+    `Descripcion` VARCHAR(50)
+);
+
+create table if not exists `Proveedores`(
+	`Cod_prov` varchar(50) primary key,
+    `Nombre` varchar(50),
+    `Telefono` varchar(50),
+    `Email` varchar(50),
+    `Direccion` varchar(50)
+);
+
+CREATE TABLE IF NOT EXISTS  `Stock`(
+	`Codigo_repuesto` VARCHAR(50) PRIMARY KEY,
     `Descripcion` VARCHAR(50),
-    FOREIGN KEY (`ID`) REFERENCES `Reparaciones`(`ID`)
+    `Cant_rep_libre` int,
+    `Cant_rep_total` int,
+    `Proveedor` varchar(50),
+    FOREIGN KEY (`Proveedor`) REFERENCES `Proveedores`(`Cod_prov`),
+    `Precio` FLOAT
 );
 
 

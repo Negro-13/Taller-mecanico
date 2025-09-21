@@ -19,8 +19,8 @@ class TallerDB:
             print("> Error de conexion:", ex)
             exit()
 
-def vehiculos(page: ft.Page):
-    page.title = "Interfaz Vehiculo"
+def mecanicos(page: ft.Page):
+    page.title = "Interfaz Mecanicos"
     db = TallerDB()
 
     area_derecha = ft.Column()
@@ -35,20 +35,20 @@ def vehiculos(page: ft.Page):
     page.overlay.append(bottom_sheet)
 
     def mostrar_todos(e):
-        query = "SELECT * FROM Vehiculos"
+        query = "SELECT * FROM Mecanicos"
         db.cursor.execute(query)
         resultados = db.cursor.fetchall()
 
-        def editar_vehiculo(e):
-            patente = e.control.data
-            print(f"Editar vehiculo con Patente: {patente}")
+        def editar_mecanico(e):
+            legajo = e.control.data
+            print(f"Editar mecanico con Legajo: {legajo}")
 
-        def eliminar_vehiculo(e):
-            patente = e.control.data
+        def eliminar_mecanico(e):
+            legajo = e.control.data
 
             def seguro_borrar(ev):
-                delete_query = "DELETE FROM Vehiculos WHERE Patente = %s"
-                db.cursor.execute(delete_query, (patente,))
+                delete_query = "DELETE FROM Mecanicos WHERE Legajo = %s"
+                db.cursor.execute(delete_query, (legajo,))
                 db.connection.commit()
                 bottom_sheet.open = False
                 page.update()
@@ -59,7 +59,7 @@ def vehiculos(page: ft.Page):
                 page.update()
 
             bottom_sheet.content.content.controls.clear()
-            bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar el vehículo?"))
+            bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar al mecanico?"))
             bottom_sheet.content.content.controls.append(
                 ft.Row([
                     ft.ElevatedButton("Seguro", on_click=seguro_borrar),
@@ -70,33 +70,33 @@ def vehiculos(page: ft.Page):
             page.update()
 
         filas = []
-        for vehiculo in resultados:
-            patente = vehiculo[0]
-            btn_editar = ft.ElevatedButton("Editar", on_click=editar_vehiculo, data=patente)
-            btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_vehiculo, data=patente)
+        for mecanico in resultados:
+            legajo = mecanico[0]
+            btn_editar = ft.ElevatedButton("Editar", on_click=editar_mecanico, data=legajo)
+            btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_mecanico, data=legajo)
 
             fila = ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(vehiculo[0])),
-                    ft.DataCell(ft.Text(vehiculo[1])),
-                    ft.DataCell(ft.Text(vehiculo[2])),
-                    ft.DataCell(ft.Text(vehiculo[3])),
-                    ft.DataCell(ft.Text(vehiculo[4])),
+                    ft.DataCell(ft.Text(str(mecanico[0]))),
+                    ft.DataCell(ft.Text(mecanico[1])),
+                    ft.DataCell(ft.Text(mecanico[2])),
+                    ft.DataCell(ft.Text(mecanico[3])),
+                    ft.DataCell(ft.Text(mecanico[4])),
                     ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
                 ]
             )
             filas.append(fila)
 
         area_derecha.controls.clear()
-        area_derecha.controls.append(ft.Text("Lista de Vehiculos:"))
+        area_derecha.controls.append(ft.Text("Lista de Mecanicos:"))
         area_derecha.controls.append(
             ft.DataTable(
                 columns=[
-                    ft.DataColumn(ft.Text("Patente")),
-                    ft.DataColumn(ft.Text("DNI")),
-                    ft.DataColumn(ft.Text("Marca")),
-                    ft.DataColumn(ft.Text("Modelo")),
-                    ft.DataColumn(ft.Text("Color")),
+                    ft.DataColumn(ft.Text("Legajo")),
+                    ft.DataColumn(ft.Text("Nombre")),
+                    ft.DataColumn(ft.Text("Apellido")),
+                    ft.DataColumn(ft.Text("Rol")),
+                    ft.DataColumn(ft.Text("Estado")),
                     ft.DataColumn(ft.Text("Acciones")),
                 ],
                 rows=filas
@@ -104,53 +104,53 @@ def vehiculos(page: ft.Page):
         )
         page.update()
 
-    def crear_vehiculo(e):
-        patente_vehiculo = ft.TextField(label="Patente")
-        dni_dueño = ft.TextField(label="DNI")
-        marca_vehiculo = ft.TextField(label="Marca")
-        modelo_vehiculo = ft.TextField(label="Modelo")
-        color_vehiculo = ft.TextField(label="Color")
+    def crear_mecanico(e):
+        legajo_mecanico = ft.TextField(label="Lejajo")
+        nombre_mecanico = ft.TextField(label="Nombre")
+        apellido_mecanico = ft.TextField(label="Apellido")
+        rol_mecanico = ft.TextField(label="Rol")
+        estado_mecanico = ft.TextField(label="Estado")
 
-        def guardar_vehiculo(e):
-            insert_query = "INSERT INTO Vehiculos (Patente, DNI, Marca, Modelo, Color) VALUES (%s, %s, %s, %s, %s)"
+        def guardar_mecanico(e):
+            insert_query = "INSERT INTO Mecanicos (Legajo, Nombre, Apellido, Rol, Estado) VALUES (%s, %s, %s, %s, %s)"
             data = (
-                patente_vehiculo.value,
-                dni_dueño.value,
-                marca_vehiculo.value,
-                modelo_vehiculo.value,
-                color_vehiculo.value
+                legajo_mecanico.value,
+                nombre_mecanico.value,
+                apellido_mecanico.value,
+                rol_mecanico.value,
+                estado_mecanico.value
             )
             db.cursor.execute(insert_query, data)
             db.connection.commit()
             mostrar_todos(None)
-
-        boton_crear = ft.ElevatedButton("Crear", on_click=guardar_vehiculo)
-        boton_buscar = ft.ElevatedButton("Buscar", on_click=buscar_vehiculo)
+        
+        boton_crear = ft.ElevatedButton("Crear", on_click=guardar_mecanico)
+        boton_buscar = ft.ElevatedButton("Buscar", on_click=buscar_mecanico)
 
         area_izquierda.controls.clear()
-        area_izquierda.controls.append(ft.Text("Crear nuevo vehículo:"))
-        area_izquierda.controls.append(patente_vehiculo)
-        area_izquierda.controls.append(dni_dueño)
-        area_izquierda.controls.append(marca_vehiculo)
-        area_izquierda.controls.append(modelo_vehiculo)
-        area_izquierda.controls.append(color_vehiculo)
+        area_izquierda.controls.append(ft.Text("Crear nuevo mecanico:"))
+        area_izquierda.controls.append(legajo_mecanico)
+        area_izquierda.controls.append(nombre_mecanico)
+        area_izquierda.controls.append(apellido_mecanico)
+        area_izquierda.controls.append(rol_mecanico)
+        area_izquierda.controls.append(estado_mecanico)
         area_izquierda.controls.append(ft.Row(controls=[boton_buscar, boton_crear]))
         page.update()
 
-    def buscar_vehiculo(e):
+    def buscar_mecanico(e):
         area_izquierda.controls.clear()
+
         campo_busqueda = ft.TextField(label="Ingrese el valor a buscar")
 
         criterio_dropdown = ft.Dropdown(
             label="Buscar por",
             options=[
-                ft.dropdown.Option("Patente"),
-                ft.dropdown.Option("DNI"),
-                ft.dropdown.Option("Marca"),
-                ft.dropdown.Option("Modelo"),
-                ft.dropdown.Option("Color")
+                ft.dropdown.Option("Legajo"),
+                ft.dropdown.Option("Nombre"),
+                ft.dropdown.Option("Apellido"),
+                ft.dropdown.Option("Rol")
             ],
-            value="Patente"
+            value="Legajo"
         )
 
         def ejecutar_busqueda(e):
@@ -158,30 +158,29 @@ def vehiculos(page: ft.Page):
             criterio = criterio_dropdown.value
 
             columnas_sql = {
-                "Patente": "Patente",
-                "DNI": "DNI",
-                "Marca": "Marca",
-                "Modelo": "Modelo",
-                "Color": "Color"
+                "Legajo": "Legajo",
+                "Nombre": "Nombre",
+                "Apellido": "Apellido",
+                "Rol": "Rol"
             }
 
             if criterio not in columnas_sql:
                 return
 
-            query = f"SELECT * FROM Vehiculos WHERE {columnas_sql[criterio]} = %s"
+            query = f"SELECT * FROM Mecanicos WHERE {columnas_sql[criterio]} = %s"
             db.cursor.execute(query, (valor,))
             resultados = db.cursor.fetchall()
 
-            def editar_vehiculo(e):
-                patente = e.control.data
-                print(f"Editar vehiculo con Patente: {patente}")
+            def editar_mecanico(e):
+                legajo = e.control.data
+                print(f"Editar Mecanico con legajo: {legajo}")
 
-            def eliminar_vehiculo(e):
-                patente = e.control.data
+            def eliminar_mecanico(e):
+                legajo = e.control.data
 
                 def seguro_borrar(ev):
-                    delete_query = "DELETE FROM Vehiculos WHERE Patente = %s"
-                    db.cursor.execute(delete_query, (patente,))
+                    delete_query = "DELETE FROM Mecanicos WHERE Legajo = %s"
+                    db.cursor.execute(delete_query, (legajo,))
                     db.connection.commit()
                     bottom_sheet.open = False
                     page.update()
@@ -192,7 +191,7 @@ def vehiculos(page: ft.Page):
                     page.update()
 
                 bottom_sheet.content.content.controls.clear()
-                bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar el vehículo?"))
+                bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar al mecanico?"))
                 bottom_sheet.content.content.controls.append(
                     ft.Row([
                         ft.ElevatedButton("Seguro", on_click=seguro_borrar),
@@ -203,18 +202,18 @@ def vehiculos(page: ft.Page):
                 page.update()
 
             filas = []
-            for vehiculo in resultados:
-                patente = vehiculo[0]
-                btn_editar = ft.ElevatedButton("Editar", on_click=editar_vehiculo, data=patente)
-                btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_vehiculo, data=patente)
+            for mecanico in resultados:
+                legajo = mecanico[0]
+                btn_editar = ft.ElevatedButton("Editar", on_click=editar_mecanico, data=legajo)
+                btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_mecanico, data=legajo)
 
                 fila = ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(vehiculo[0])),
-                        ft.DataCell(ft.Text(vehiculo[1])),
-                        ft.DataCell(ft.Text(vehiculo[2])),
-                        ft.DataCell(ft.Text(vehiculo[3])),
-                        ft.DataCell(ft.Text(vehiculo[4])),
+                        ft.DataCell(ft.Text(str(mecanico[0]))),
+                        ft.DataCell(ft.Text(mecanico[1])),
+                        ft.DataCell(ft.Text(mecanico[2])),
+                        ft.DataCell(ft.Text(mecanico[3])),
+                        ft.DataCell(ft.Text(mecanico[4])),
                         ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
                     ]
                 )
@@ -225,11 +224,11 @@ def vehiculos(page: ft.Page):
             area_derecha.controls.append(
                 ft.DataTable(
                     columns=[
-                        ft.DataColumn(ft.Text("Patente")),
-                        ft.DataColumn(ft.Text("DNI")),
-                        ft.DataColumn(ft.Text("Marca")),
-                        ft.DataColumn(ft.Text("Modelo")),
-                        ft.DataColumn(ft.Text("Color")),
+                        ft.DataColumn(ft.Text("Legajo")),
+                        ft.DataColumn(ft.Text("Nombre")),
+                        ft.DataColumn(ft.Text("Apellido")),
+                        ft.DataColumn(ft.Text("Rol")),
+                        ft.DataColumn(ft.Text("Estado")),
                         ft.DataColumn(ft.Text("Acciones")),
                     ],
                     rows=filas
@@ -238,10 +237,10 @@ def vehiculos(page: ft.Page):
             page.update()
 
         boton_buscar = ft.ElevatedButton("Buscar", on_click=ejecutar_busqueda)
-        boton_crear = ft.ElevatedButton("Crear", on_click=crear_vehiculo)
+        boton_crear = ft.ElevatedButton("Crear", on_click=crear_mecanico)
         boton_atras = ft.ElevatedButton("Atras", on_click=mostrar_todos)
 
-        area_izquierda.controls.append(ft.Text("Buscar vehículo"))
+        area_izquierda.controls.append(ft.Text("Buscar mecanico"))
         area_izquierda.controls.append(criterio_dropdown)
         area_izquierda.controls.append(campo_busqueda)
         area_izquierda.controls.append(ft.Row(controls=[boton_buscar, boton_crear, boton_atras]))
@@ -257,7 +256,6 @@ def vehiculos(page: ft.Page):
 
     page.add(layout)
     mostrar_todos(None)
-    buscar_vehiculo(None)
+    buscar_mecanico(None)
 
-
-# ft.app(target=vehiculos)
+# ft.app(target=mecanicos)

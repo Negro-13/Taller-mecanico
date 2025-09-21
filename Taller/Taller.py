@@ -1,14 +1,16 @@
 import flet as ft
 import mysql.connector
 from Clientes import clientes
+from Vehiculo import vehiculos   
+from Mecanicos import mecanicos
 
 def connect_to_db():
     try:
         connection = mysql.connector.connect(
             host='localhost',
-            port='3306',
+            port='3308',
             user='root',
-            password='',
+            password='root',
             database='Taller_Mecanico',
             ssl_disabled=True
         )
@@ -113,8 +115,16 @@ def menu_principal(page: ft.Page):
     )
     
     # ---Botones de herramientas---
-    boton_cliente = ft.IconButton(content=ft.Row(controls=[cliente_icono]), tooltip="Cliente", on_click=cliente)
-    boton_vehiculo = ft.IconButton(content=ft.Row(controls=[vehiculo_icono]), tooltip="Vehiculo")
+    boton_cliente = ft.IconButton(
+        content=ft.Row(controls=[cliente_icono]),
+        tooltip="Cliente",
+        on_click=lambda e: cliente(e, page)
+    )
+    boton_vehiculo = ft.IconButton(
+        content=ft.Row(controls=[vehiculo_icono]),
+        tooltip="Vehiculo",
+        on_click=lambda e: vehiculo(e, page)
+    )
     boton_producto = ft.IconButton(content=ft.Row(controls=[repuesto_icono]), tooltip="Repuesto")
     boton_ficha_tecnica = ft.IconButton(content=ft.Row(controls=[ficha_tecnica_icono]), tooltip="Ficha Técnica")
     boton_presupuesto = ft.IconButton(content=ft.Row(controls=[presupuesto_icono]), tooltip="Presupuesto")
@@ -122,14 +132,18 @@ def menu_principal(page: ft.Page):
     # ---Agregar al layout---
     page.add(
         ft.Row(controls=[archivo_menu, administracion, herramientas_menu], spacing=10),
-        ft.Row(controls=[boton_cliente, boton_producto, boton_ficha_tecnica, boton_presupuesto])
+        ft.Row(controls=[boton_cliente,boton_vehiculo, boton_producto, boton_ficha_tecnica, boton_presupuesto])
     )
 
 def cliente(e, page: ft.Page):
+    page.clean()
+    menu_principal(page)
     clientes(page)
 
 def vehiculo(e, page:ft.Page):
-    clientes(page)
+    page.clean()
+    menu_principal(page)
+    vehiculos(page)
 
 def proveedor(e, page: ft.Page):
     pass
@@ -138,7 +152,9 @@ def producto(e, page: ft.Page):
     pass
 
 def empleado(e, page: ft.Page):
-    pass
+    page.clean()
+    menu_principal(page)
+    mecanicos(page)
 
 def usuario(e, page: ft.Page):
     pass
