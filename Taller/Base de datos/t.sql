@@ -65,4 +65,11 @@ CREATE TABLE IF NOT EXISTS  `Stock`(
     `Precio` FLOAT
 );
 
+CREATE TABLE IF NOT EXISTS `Usuarios` (
+    `Usuario` VARCHAR(50) PRIMARY KEY,
+    `Clave` VARCHAR(50),
+    `Nombre` VARCHAR(50),
+    `Apellido` VARCHAR(50)
+);
+
 

@@ -20,7 +20,7 @@ class TallerDB:
             exit()
 
 def proveedores(page: ft.Page):
-    page.title = "Interfaz proveedores"
+    page.title = "Interfaz Proveedores"
     db = TallerDB()
 
     area_derecha = ft.Column()
@@ -39,16 +39,16 @@ def proveedores(page: ft.Page):
         db.cursor.execute(query)
         resultados = db.cursor.fetchall()
 
-        def editar_cliente(e):
-            dni = e.control.data
-            print(f"Editar cliente con DNI: {dni}")
+        def editar_proveedor(e):
+            cod_prov = e.control.data
+            print(f"Editar proveedor con Código: {cod_prov}")
 
-        def eliminar_cliente(e):
-            dni = e.control.data
+        def eliminar_proveedor(e):
+            cod_prov = e.control.data
 
             def seguro_borrar(ev):
-                delete_query = "DELETE FROM Clientes WHERE DNI = %s"
-                db.cursor.execute(delete_query, (dni,))
+                delete_query = "DELETE FROM Proveedores WHERE Cod_prov = %s"
+                db.cursor.execute(delete_query, (cod_prov,))
                 db.connection.commit()
                 bottom_sheet.open = False
                 page.update()
@@ -59,7 +59,7 @@ def proveedores(page: ft.Page):
                 page.update()
 
             bottom_sheet.content.content.controls.clear()
-            bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar el cliente?"))
+            bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar el proveedor?"))
             bottom_sheet.content.content.controls.append(
                 ft.Row([
                     ft.ElevatedButton("Seguro", on_click=seguro_borrar),
@@ -70,32 +70,32 @@ def proveedores(page: ft.Page):
             page.update()
 
         filas = []
-        for cliente in resultados:
-            dni = cliente[0]
-            btn_editar = ft.ElevatedButton("Editar", on_click=editar_cliente, data=dni)
-            btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_cliente, data=dni)
+        for proveedor in resultados:
+            cod_prov = proveedor[0]
+            btn_editar = ft.ElevatedButton("Editar", on_click=editar_proveedor, data=cod_prov)
+            btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_proveedor, data=cod_prov)
 
             fila = ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(str(cliente[0]))),
-                    ft.DataCell(ft.Text(cliente[1])),
-                    ft.DataCell(ft.Text(cliente[2])),
-                    ft.DataCell(ft.Text(cliente[4])),
-                    ft.DataCell(ft.Text(cliente[3])),
+                    ft.DataCell(ft.Text(str(proveedor[0]))),
+                    ft.DataCell(ft.Text(proveedor[1])),
+                    ft.DataCell(ft.Text(proveedor[2])),
+                    ft.DataCell(ft.Text(proveedor[3])),
+                    ft.DataCell(ft.Text(proveedor[4])),
                     ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
                 ]
             )
             filas.append(fila)
 
         area_derecha.controls.clear()
-        area_derecha.controls.append(ft.Text("Lista de Clientes:"))
+        area_derecha.controls.append(ft.Text("Lista de Proveedores:"))
         area_derecha.controls.append(
             ft.DataTable(
                 columns=[
-                    ft.DataColumn(ft.Text("DNI")),
+                    ft.DataColumn(ft.Text("Código")),
                     ft.DataColumn(ft.Text("Nombre")),
-                    ft.DataColumn(ft.Text("Apellido")),
                     ft.DataColumn(ft.Text("Teléfono")),
+                    ft.DataColumn(ft.Text("Email")),
                     ft.DataColumn(ft.Text("Dirección")),
                     ft.DataColumn(ft.Text("Acciones")),
                 ],
@@ -104,53 +104,53 @@ def proveedores(page: ft.Page):
         )
         page.update()
 
-    def crear_cliente(e):
-        dni_cliente = ft.TextField(label="DNI")
-        nombre_cliente = ft.TextField(label="Nombre")
-        apellido_cliente = ft.TextField(label="Apellido")
-        telefono_cliente = ft.TextField(label="Teléfono")
-        direccion_cliente = ft.TextField(label="Dirección")
+    def crear_proveedor(e):
+        cod_prov = ft.TextField(label="Código")
+        nombre = ft.TextField(label="Nombre")
+        telefono = ft.TextField(label="Teléfono")
+        email = ft.TextField(label="Email")
+        direccion = ft.TextField(label="Dirección")
 
-        def guardar_cliente(e):
-            insert_query = "INSERT INTO Clientes (DNI, Nombre, Apellido, Direccion, Telefono) VALUES (%s, %s, %s, %s, %s)"
+        def guardar_proveedor(e):
+            insert_query = "INSERT INTO Proveedores (Cod_prov, Nombre, Telefono, Email, Direccion) VALUES (%s, %s, %s, %s, %s)"
             data = (
-                dni_cliente.value,
-                nombre_cliente.value,
-                apellido_cliente.value,
-                direccion_cliente.value,
-                telefono_cliente.value
+                cod_prov.value,
+                nombre.value,
+                telefono.value,
+                email.value,
+                direccion.value
             )
             db.cursor.execute(insert_query, data)
             db.connection.commit()
             mostrar_todos(None)
-        
-        boton_crear = ft.ElevatedButton("Crear", on_click=guardar_cliente)
-        boton_buscar = ft.ElevatedButton("Buscar", on_click=buscar_cliente)
+
+        boton_crear = ft.ElevatedButton("Crear", on_click=guardar_proveedor)
+        boton_buscar = ft.ElevatedButton("Buscar", on_click=buscar_proveedor)
 
         area_izquierda.controls.clear()
-        area_izquierda.controls.append(ft.Text("Crear nuevo cliente:"))
-        area_izquierda.controls.append(dni_cliente)
-        area_izquierda.controls.append(nombre_cliente)
-        area_izquierda.controls.append(apellido_cliente)
-        area_izquierda.controls.append(telefono_cliente)
-        area_izquierda.controls.append(direccion_cliente)
+        area_izquierda.controls.append(ft.Text("Crear nuevo proveedor:"))
+        area_izquierda.controls.append(cod_prov)
+        area_izquierda.controls.append(nombre)
+        area_izquierda.controls.append(telefono)
+        area_izquierda.controls.append(email)
+        area_izquierda.controls.append(direccion)
         area_izquierda.controls.append(ft.Row(controls=[boton_buscar, boton_crear]))
         page.update()
 
-    def buscar_cliente(e):
+    def buscar_proveedor(e):
         area_izquierda.controls.clear()
-
         campo_busqueda = ft.TextField(label="Ingrese el valor a buscar")
 
         criterio_dropdown = ft.Dropdown(
             label="Buscar por",
             options=[
-                ft.dropdown.Option("DNI"),
+                ft.dropdown.Option("Código"),
                 ft.dropdown.Option("Nombre"),
-                ft.dropdown.Option("Apellido"),
-                ft.dropdown.Option("Teléfono")
+                ft.dropdown.Option("Teléfono"),
+                ft.dropdown.Option("Email"),
+                ft.dropdown.Option("Dirección")
             ],
-            value="DNI"
+            value="Código"
         )
 
         def ejecutar_busqueda(e):
@@ -158,29 +158,30 @@ def proveedores(page: ft.Page):
             criterio = criterio_dropdown.value
 
             columnas_sql = {
-                "DNI": "DNI",
+                "Código": "Cod_prov",
                 "Nombre": "Nombre",
-                "Apellido": "Apellido",
-                "Teléfono": "Telefono"
+                "Teléfono": "Telefono",
+                "Email": "Email",
+                "Dirección": "Direccion"
             }
 
             if criterio not in columnas_sql:
                 return
 
-            query = f"SELECT * FROM Clientes WHERE {columnas_sql[criterio]} = %s"
+            query = f"SELECT * FROM Proveedores WHERE {columnas_sql[criterio]} = %s"
             db.cursor.execute(query, (valor,))
             resultados = db.cursor.fetchall()
 
-            def editar_cliente(e):
-                dni = e.control.data
-                print(f"Editar cliente con DNI: {dni}")
+            def editar_proveedor(e):
+                cod_prov = e.control.data
+                print(f"Editar proveedor con Código: {cod_prov}")
 
-            def eliminar_cliente(e):
-                dni = e.control.data
+            def eliminar_proveedor(e):
+                cod_prov = e.control.data
 
                 def seguro_borrar(ev):
-                    delete_query = "DELETE FROM Clientes WHERE DNI = %s"
-                    db.cursor.execute(delete_query, (dni,))
+                    delete_query = "DELETE FROM Proveedores WHERE Cod_prov = %s"
+                    db.cursor.execute(delete_query, (cod_prov,))
                     db.connection.commit()
                     bottom_sheet.open = False
                     page.update()
@@ -191,7 +192,7 @@ def proveedores(page: ft.Page):
                     page.update()
 
                 bottom_sheet.content.content.controls.clear()
-                bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar el cliente?"))
+                bottom_sheet.content.content.controls.append(ft.Text("¿Seguro que quieres borrar el proveedor?"))
                 bottom_sheet.content.content.controls.append(
                     ft.Row([
                         ft.ElevatedButton("Seguro", on_click=seguro_borrar),
@@ -202,18 +203,18 @@ def proveedores(page: ft.Page):
                 page.update()
 
             filas = []
-            for cliente in resultados:
-                dni = cliente[0]
-                btn_editar = ft.ElevatedButton("Editar", on_click=editar_cliente, data=dni)
-                btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_cliente, data=dni)
+            for proveedor in resultados:
+                cod_prov = proveedor[0]
+                btn_editar = ft.ElevatedButton("Editar", on_click=editar_proveedor, data=cod_prov)
+                btn_eliminar = ft.ElevatedButton("Eliminar", on_click=eliminar_proveedor, data=cod_prov)
 
                 fila = ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(cliente[0])),
-                        ft.DataCell(ft.Text(cliente[1])),
-                        ft.DataCell(ft.Text(cliente[2])),
-                        ft.DataCell(ft.Text(cliente[4])),
-                        ft.DataCell(ft.Text(cliente[3])),
+                        ft.DataCell(ft.Text(proveedor[0])),
+                        ft.DataCell(ft.Text(proveedor[1])),
+                        ft.DataCell(ft.Text(proveedor[2])),
+                        ft.DataCell(ft.Text(proveedor[3])),
+                        ft.DataCell(ft.Text(proveedor[4])),
                         ft.DataCell(ft.Row(controls=[btn_editar, btn_eliminar]))
                     ]
                 )
@@ -224,10 +225,10 @@ def proveedores(page: ft.Page):
             area_derecha.controls.append(
                 ft.DataTable(
                     columns=[
-                        ft.DataColumn(ft.Text("DNI")),
+                        ft.DataColumn(ft.Text("Código")),
                         ft.DataColumn(ft.Text("Nombre")),
-                        ft.DataColumn(ft.Text("Apellido")),
                         ft.DataColumn(ft.Text("Teléfono")),
+                        ft.DataColumn(ft.Text("Email")),
                         ft.DataColumn(ft.Text("Dirección")),
                         ft.DataColumn(ft.Text("Acciones")),
                     ],
@@ -237,10 +238,10 @@ def proveedores(page: ft.Page):
             page.update()
 
         boton_buscar = ft.ElevatedButton("Buscar", on_click=ejecutar_busqueda)
-        boton_crear = ft.ElevatedButton("Crear", on_click=crear_cliente)
+        boton_crear = ft.ElevatedButton("Crear", on_click=crear_proveedor)
         boton_atras = ft.ElevatedButton("Atras", on_click=mostrar_todos)
 
-        area_izquierda.controls.append(ft.Text("Buscar cliente"))
+        area_izquierda.controls.append(ft.Text("Buscar proveedor"))
         area_izquierda.controls.append(criterio_dropdown)
         area_izquierda.controls.append(campo_busqueda)
         area_izquierda.controls.append(ft.Row(controls=[boton_buscar, boton_crear, boton_atras]))
@@ -256,6 +257,6 @@ def proveedores(page: ft.Page):
 
     page.add(layout)
     mostrar_todos(None)
-    buscar_cliente(None)
+    buscar_proveedor(None)
 
-#ft.app(target=clientes)
+#ft.app(target=proveedores)

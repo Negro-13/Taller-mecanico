@@ -3,6 +3,8 @@ import mysql.connector
 from Clientes import clientes
 from Vehiculo import vehiculos   
 from Mecanicos import mecanicos
+from Proveedores import proveedores
+from Stock import stock
 
 def connect_to_db():
     try:
@@ -125,7 +127,11 @@ def menu_principal(page: ft.Page):
         tooltip="Vehiculo",
         on_click=lambda e: vehiculo(e, page)
     )
-    boton_producto = ft.IconButton(content=ft.Row(controls=[repuesto_icono]), tooltip="Repuesto")
+    boton_producto = ft.IconButton(
+        content=ft.Row(controls=[repuesto_icono]),
+        tooltip="Repuesto",
+        on_click=lambda e: producto(e, page)
+    )
     boton_ficha_tecnica = ft.IconButton(content=ft.Row(controls=[ficha_tecnica_icono]), tooltip="Ficha Técnica")
     boton_presupuesto = ft.IconButton(content=ft.Row(controls=[presupuesto_icono]), tooltip="Presupuesto")
     
@@ -146,10 +152,14 @@ def vehiculo(e, page:ft.Page):
     vehiculos(page)
 
 def proveedor(e, page: ft.Page):
-    pass
+    page.clean()
+    menu_principal(page)
+    proveedores(page)
 
 def producto(e, page: ft.Page):
-    pass
+    page.clean()
+    menu_principal(page)
+    stock(page)
 
 def empleado(e, page: ft.Page):
     page.clean()
@@ -159,9 +169,68 @@ def empleado(e, page: ft.Page):
 def usuario(e, page: ft.Page):
     pass
 
+def login(page: ft.Page):
+    usuario = ft.TextField(label="Usuario")
+    clave = ft.TextField(label="Contraseña", password=True, can_reveal_password=True)
+    nombre = ft.TextField(label="Nombre")
+    apellido = ft.TextField(label="Apellido")
+    mensaje = ft.Text("")
+    modo_registro = ft.Checkbox(label="Registrar nuevo usuario")
+
+    def validar(e):
+        db = connection.cursor()
+        if modo_registro.value:
+            # Registro de usuario
+            db.execute("SELECT * FROM Usuarios WHERE Usuario=%s", (usuario.value,))
+            if db.fetchone():
+                mensaje.value = "El usuario ya existe"
+            else:
+                db.execute(
+                    "INSERT INTO Usuarios (Usuario, Clave, Nombre, Apellido) VALUES (%s, %s, %s, %s)",
+                    (usuario.value, clave.value, nombre.value, apellido.value)
+                )
+                connection.commit()
+                mensaje.value = "Usuario registrado correctamente"
+        else:
+            # Login
+            db.execute("SELECT Nombre, Apellido FROM Usuarios WHERE Usuario=%s AND Clave=%s", (usuario.value, clave.value))
+            datos = db.fetchone()
+            if datos:
+                page.clean()
+                page.session.set("usuario", usuario.value)
+                page.session.set("nombre", datos[0])
+                page.session.set("apellido", datos[1])
+                menu_principal(page)
+            else:
+                mensaje.value = "Usuario o contraseña incorrectos"
+        page.update()
+
+    btn_login = ft.ElevatedButton("Ingresar / Registrar", on_click=validar)
+    login_form = ft.Column(
+        controls=[
+            ft.Text("Login", size=24, weight="bold"),
+            usuario,
+            clave,
+            nombre,
+            apellido,
+            modo_registro,
+            btn_login,
+            mensaje
+        ],
+        alignment=ft.MainAxisAlignment.CENTER,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+    )
+    page.add(
+        ft.Container(
+            content=login_form,
+            alignment=ft.alignment.center,
+            expand=True
+        )
+    )
+
 def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
     page.window.maximized = True
-    menu_principal(page)
+    login(page)
 
 ft.app(target=main, assets_dir="assets")
